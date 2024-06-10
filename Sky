@@ -1,0 +1,119 @@
+--[[
+    Script para Roblox Executor
+    Este script cria uma GUI para automação de várias funções no jogo, incluindo infligir dano ao jogador mais próximo
+]]
+
+-- Carregando a biblioteca Fluent para criar a GUI
+local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/Tienvn123tkvn/Test/main/ZINERHUB_Ui.lua"))()
+
+-- Criando a janela principal da GUI
+local Window = Fluent:CreateWindow({
+    Title = "ZINER HUB",
+    SubTitle = "Kai Wibu",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(500, 320),
+    Acrylic = true,
+    Theme = "Black",
+    MinimizeKey = Enum.KeyCode.End
+})
+
+-- Adicionando abas à janela principal
+local Tabs = {
+    profile = Window:AddTab({ Title = "Information", Icon = "scan-face" }),
+    Main = Window:AddTab({ Title = "Main Farm", Icon = "home" }),
+    Sea = Window:AddTab({ Title = "Sea Event", Icon = "anchor" }),
+    Setting = Window:AddTab({ Title = "Settings", Icon = "settings" }),
+    Status = Window:AddTab({ Title = "Server Stats", Icon = "activity" }),
+    Stats = Window:AddTab({ Title = "Stats", Icon = "plus-circle" }),
+    Player = Window:AddTab({ Title = "Player pvp", Icon = "baby" }),  -- Aba para funcionalidades PvP
+    Teleport = Window:AddTab({ Title = "Teleport", Icon = "palmtree" }),
+    Fruit = Window:AddTab({ Title = "Fruit Blox ESP", Icon = "apple" }),
+    Raid = Window:AddTab({ Title = "Dungeon", Icon = "swords" }),
+    Race = Window:AddTab({ Title = "Race Trial V4", Icon = "chevrons-right" }),
+    Shop = Window:AddTab({ Title = "Shop", Icon = "shopping-cart" }),
+    Misc = Window:AddTab({ Title = "Miscellaneous", Icon = "list-plus" }),
+    Hop = Window:AddTab({ Title = "Hop Server", Icon = "wifi" }),
+}
+
+-- Função para prevenir banimentos automáticos destruindo scripts suspeitos
+local function AntiBan()
+    for i, v in pairs(game:GetService("Players").LocalPlayer.Character:GetDescendants()) do
+        if v:IsA("LocalScript") then
+            if v.Name == "General" or v.Name == "Shiftlock" or v.Name == "FallDamage" or v.Name == "4444" or v.Name == "CamBob" or v.Name == "JumpCD" or v.Name == "Looking" or v.Name == "Run" then
+                v:Destroy()
+            end
+        end
+    end
+    for i, v in pairs(game:GetService("Players").LocalPlayer.PlayerScripts:GetDescendants()) do
+        if v:IsA("LocalScript") then
+            if v.Name == "RobloxMotor6DBugFix" or v.Name == "Clans" or v.Name == "Codes" or v.Name == "CustomForceField" or v.Name == "MenuBloodSp" or v.Name == "PlayerList" then
+                v:Destroy()
+            end
+        end
+    end
+end
+
+AntiBan()  -- Chamando a função AntiBan para limpar scripts suspeitos
+
+-- Função para prevenir desconexão por inatividade
+game:GetService("Players").LocalPlayer.Idled:connect(function()
+    game:GetService("VirtualUser"):Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+    wait(1)
+    game:GetService("VirtualUser"):Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+end)
+
+-- Adicionando elementos à aba "Player pvp"
+local PlayerTab = Tabs.Player
+
+-- Criando o campo de entrada para especificar a quantidade de dano
+local damageInput = Instance.new("TextBox")
+damageInput.Name = "DamageInput"
+damageInput.Text = "Enter Damage"
+damageInput.Size = UDim2.new(0, 200, 0, 50)
+damageInput.Position = UDim2.new(0, 10, 0, 10)
+damageInput.Parent = PlayerTab
+
+-- Criando o botão para aplicar o dano
+local applyDamageButton = Instance.new("TextButton")
+applyDamageButton.Name = "ApplyDamageButton"
+applyDamageButton.Text = "Apply Damage"
+applyDamageButton.Size = UDim2.new(0, 200, 0, 50)
+applyDamageButton.Position = UDim2.new(0, 10, 0, 70)
+applyDamageButton.Parent = PlayerTab
+
+-- Função para encontrar o jogador mais próximo
+local function getClosestPlayer()
+    local player = game.Players.LocalPlayer
+    local closestPlayer = nil
+    local shortestDistance = math.huge
+    
+    for _, otherPlayer in pairs(game.Players:GetPlayers()) do
+        if otherPlayer ~= player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            local distance = (player.Character.HumanoidRootPart.Position - otherPlayer.Character.HumanoidRootPart.Position).magnitude
+            if distance < shortestDistance then
+                shortestDistance = distance
+                closestPlayer = otherPlayer
+            end
+        end
+    end
+    
+    return closestPlayer
+end
+
+-- Função para aplicar dano ao jogador alvo
+local function applyDamageToPlayer(damage)
+    local target = getClosestPlayer()
+    if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+        target.Character.Humanoid:TakeDamage(damage)
+    end
+end
+
+-- Conectando o botão à função de aplicar dano
+applyDamageButton.MouseButton1Click:Connect(function()
+    local damage = tonumber(damageInput.Text)
+    if damage then
+        applyDamageToPlayer(damage)
+    else
+        print("Please enter a valid number for damage")
+    end
+end)
